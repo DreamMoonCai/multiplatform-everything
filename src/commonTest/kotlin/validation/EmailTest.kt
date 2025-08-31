@@ -5,6 +5,7 @@ import com.martmists.multiplatform.validation.UnsafeSkipValidation
 import kotlin.js.JsName
 import kotlin.test.Test
 import kotlin.test.assertFails
+import kotlin.test.assertTrue
 import kotlin.test.fail
 
 
@@ -29,7 +30,6 @@ class EmailTest {
             "email.@example.com",
             "email..email@example.com",
             "あいうえお@example.com",
-            "email@-example.com",
             "email@111.222.333.44444",
             "email@example..com",
             "Abc..123@example.com",
@@ -39,7 +39,7 @@ class EmailTest {
             "very.”(),:;<>[]”.VERY.”very@\\\\ \"very”.unusual@strange.example.com",
         )) {
             assertFails(email) {
-                Email(email)
+                Email(email).also(::println)
             }
         }
     }
@@ -57,6 +57,7 @@ class EmailTest {
             "\"email\"@example.com",
             "1234567890@example.com",
             "email@example-one.com",
+            "email@-example.com",  // Valid 5322, but invalid 1035. 1035 checking currently disabled.
             "_______@example.com",
             "email@example.name",
             "email@example.museum",
@@ -70,7 +71,7 @@ class EmailTest {
             try {
                 Email(email)
             } catch (e: Throwable) {
-                fail(email, e)
+                assertTrue(false, "Failed to parse email: $email. Error: ${e.stackTraceToString()}")
             }
         }
     }

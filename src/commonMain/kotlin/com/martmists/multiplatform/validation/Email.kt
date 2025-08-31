@@ -13,7 +13,7 @@ import kotlin.jvm.JvmStatic
  * - Supports (nested) comments.
  * - Supports quoted strings.
  * - Validates IPv4 and IPv6 addresses.
- * - Validates domain names according to RFC 1035, see [Domain].
+ * - Validates domain names according to RFC 1035, see [Domain]. NOT CURRENTLY FUNCTIONAL DUE TO LACK OF UTF8 SUPPORT
  * - The `validateAddressOnly` parameter can be used to validate only the `addr-spec` rule,
  *   otherwise the `address` rule is validated.
  * - The `permitComments` parameter can be used to allow comments in the email address.

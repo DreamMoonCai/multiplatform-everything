@@ -24,6 +24,7 @@ Everything is licensed BSD 3-Clause (NON-AI), PRs are welcome.
 - Logger
   - Uses SLF4J on JVM/Android
 - BigNum (A loose port of OmegaNum)
+- [Clifford Algebra](https://en.wikipedia.org/wiki/Clifford_algebra)
 
 ## Maven artifacts
 
@@ -33,7 +34,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.martmists.multiplatform-everything:multiplatform-everything:1.3.2")
+    implementation("com.martmists.multiplatform-everything:multiplatform-everything:1.4.0")
 }
 ```
 

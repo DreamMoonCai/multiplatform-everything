@@ -136,7 +136,7 @@ class EmailLexer(contents: String, private val stripComments: Boolean = false) :
     }
 
     fun consumeUTF8_2(): String {
-        return consumeMatching("[\\xC2-\\xDF]]".toRegex()) + consumeUTF8Tail()
+        return consumeMatching("[\\xC2-\\xDF]".toRegex()) + consumeUTF8Tail()
     }
 
     fun consumeUTF8_3(): String {
