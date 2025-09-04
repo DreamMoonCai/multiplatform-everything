@@ -9,6 +9,7 @@ data class CliffordAlgebra(
     val p: Int,  // (e_p)^2 == 1
     val q: Int,  // (e_q)^2 == -1
     val z: Int,  // (e_z)^2 == 0
+    val zeroEpsilon: Float = 1e-6f
 ) {
     internal val dimension = p + q + z
     init {

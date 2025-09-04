@@ -6,6 +6,7 @@ import kotlin.contracts.contract
 import kotlin.isNaN
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.truncate
 
@@ -42,8 +43,8 @@ class CliffordNumber internal constructor(
         return result
     }
 
-    fun isRealScalar() = values.withIndex().none { (i, it) -> i != 0 && it != 0f }
-    fun scalarValue(): Float = values[mask.indexOf(0L)]
+    fun isRealScalar() = values.withIndex().none { (i, it) -> i != 0 && abs(it) > algebra.zeroEpsilon }
+    fun scalarValue(): Float = values.zip(mask.toList()).firstOrNull { it.second == 0L }?.first ?: 0f
 
     operator fun plus(other: Float) = this + algebra.scalar(other)
     operator fun plus(other: CliffordNumber): CliffordNumber = withCommonAlgebra(other) { l, r ->
@@ -131,9 +132,25 @@ class CliffordNumber internal constructor(
 
     fun inverse(): CliffordNumber {
         val rev = reversed()
-        val denom = (this * rev)
-        check(denom.isRealScalar()) { "Expected denominator to be a scalar, got $denom" }  // TODO: Generalized form?
+        var denom = (this * rev)
+        if (denom.isRealScalar()) {
+            return rev / denom.scalarValue()
+        }
+        denom *= (this * involuted()).reversed()
+        check(denom.isRealScalar()) { "Could not reduce denominator to scalar, got $denom" }
+
         return rev / denom.scalarValue()
+    }
+
+    private fun involuted(): CliffordNumber {
+        val newValues = values.copyOf()
+        for (i in mask.indices) {
+            val grade = mask[i].countOneBits()
+            if (grade and 1 == 1) {
+                newValues[i] *= -1
+            }
+        }
+        return CliffordNumber(mask, newValues, algebra)
     }
 
     fun isNaN(): Boolean = values.any { it.isNaN() }
@@ -168,6 +185,9 @@ class CliffordNumber internal constructor(
 
         for ((m, v) in mask.toList().zip(values.toList())) {
             if (v == 0f) continue
+            if (parts.isNotEmpty() && v > 0) {
+                parts.add("+")
+            }
             if (m == 0L) {
                 parts += v.format(digits)
             } else {
@@ -184,7 +204,7 @@ class CliffordNumber internal constructor(
         if (parts.isEmpty()) {
             return "0"
         }
-        return parts.joinToString("+")
+        return parts.joinToString("")
     }
 
     private fun reversed(): CliffordNumber {
@@ -226,6 +246,7 @@ class CliffordNumber internal constructor(
                 max(algebra.p, other.algebra.p),
                 max(algebra.q, other.algebra.q),
                 max(algebra.z, other.algebra.z),
+                min(algebra.zeroEpsilon, other.algebra.zeroEpsilon),
             )
             return operation(reinterpretOrdered(newAlgebra), other.reinterpretOrdered(newAlgebra))
         }
