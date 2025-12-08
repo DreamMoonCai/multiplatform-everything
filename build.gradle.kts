@@ -22,9 +22,36 @@ allprojects {
     }
 }
 
+val everythingLib: KotlinNativeTarget.() -> Unit = {
+
+    binaries {
+        fun NativeLib.lib() {
+            baseName = "KEverythingLib"
+        }
+        if (konanTarget.family.isAppleFamily) framework {
+            isStatic = true
+            lib()
+        }
+        staticLib { lib() }
+        sharedLib { lib() }
+    }
+}
 
 kotlin {
     jvm("desktop")
+    androidTarget()
+    macosX64(everythingLib)
+    macosArm64(everythingLib)
+    iosX64(everythingLib)
+    iosArm64(everythingLib)
+    iosSimulatorArm64(everythingLib)
+    mingwX64("windows", everythingLib)
+    linuxX64(everythingLib)
+    linuxArm64(everythingLib)
+    androidNativeArm64(everythingLib)
+    androidNativeArm32(everythingLib)
+    androidNativeX86(everythingLib)
+    androidNativeX64(everythingLib)
     js(IR) {
         nodejs()
         browser()
@@ -34,70 +61,45 @@ kotlin {
         nodejs()
         binaries.library()
     }
-    androidTarget()
-    mingwX64()
-    linuxX64()
+
+    applyDefaultHierarchyTemplate()
 
     sourceSets {
-        val commonMain by getting {
-            dependencies {
-                implementation(kotlin("stdlib"))
-                implementation(kotlin("reflect"))
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-                implementation("io.ktor:ktor-server-core:3.1.3")
-                implementation("io.ktor:ktor-server-websockets:3.1.3")
-            }
+        commonMain.dependencies {
+            implementation(kotlin("stdlib"))
+            implementation(kotlin("reflect"))
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+            implementation("io.ktor:ktor-server-core:3.1.3")
+            implementation("io.ktor:ktor-server-websockets:3.1.3")
         }
 
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-            }
-        }
-
-        val jsMain by getting {
-            dependsOn(commonMain)
-        }
-
-        val wasmJsMain by getting {
-            dependsOn(commonMain)
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
         }
 
         val jvmMain by creating {
-            dependsOn(commonMain)
+            dependsOn(commonMain.get())
         }
 
         val jvmTest by creating {
-            dependsOn(commonTest)
+            dependsOn(commonTest.get())
         }
 
         val desktopMain by getting {
             dependsOn(jvmMain)
         }
 
-        val desktopTest by getting {
-            dependsOn(jvmTest)
+        desktopMain.dependencies {
+
         }
 
-        val androidMain by getting {
+        androidMain {
             dependsOn(jvmMain)
         }
 
-        val androidUnitTest by getting {
-            dependsOn(jvmTest)
-        }
-
-        val nativeMain by creating {
-            dependsOn(commonMain)
-        }
-
-        linuxX64Main {
-            dependsOn(nativeMain)
-        }
-
-        mingwX64Main {
-            dependsOn(nativeMain)
+        all {
+            // compilerOptions.freeCompilerArgs.add("-Xexpect-actual-classes") if needed
         }
     }
 }
@@ -114,15 +116,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-}
-
-tasks {
-    withType<KotlinCompile> {
-        compilerOptions {
-            jvmTarget = JvmTarget.JVM_17
-            freeCompilerArgs.add("-XXLanguage:+CustomEqualsInValueClasses")
-        }
     }
 }
 
