@@ -30,18 +30,20 @@ value class BigNum private constructor(
         return floor(num) == num
     }
 
-    @Suppress("RESERVED_MEMBER_INSIDE_VALUE_CLASS")
-    override operator fun equals(other: Any?): Boolean {
-        @Suppress("FORBIDDEN_IDENTITY_EQUALS")  // `this` can somehow become null
-        if (other === null) return false
-        if (other !is BigNum) return false
-
+    operator fun equals(other: BigNum): Boolean {
         if (isNaN() || other.isNaN()) return false
 
         return data.contentEquals(other.data)
     }
 
-    fun equalsValue(other: Number) = equals(BigNum(other))
+    override operator fun equals(other: Any?): Boolean {
+        if (other === null) return false
+        if (other !is BigNum) return false
+
+        return equals(other)
+    }
+
+    fun equalsValue(other: Number): Boolean = equals(BigNum(other))
 
     operator fun compareTo(other: BigNum): Int {
         val selfNan = isNaN()
