@@ -34,7 +34,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.dreammooncai:multiplatform-everything:1.5.0")
+    implementation("io.github.dreammooncai:multiplatform-everything:1.5.1")
 }
 ```
 
